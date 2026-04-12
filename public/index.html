@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tra Cứu Bảo Hành — Ninh Kiều iStore</title>
+  <meta name="description" content="Tra cứu tình trạng bảo hành sản phẩm Apple của bạn tại Ninh Kiều iStore theo số điện thoại hoặc IMEI/Serial." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #000;
+      --white: #fff;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --green-50: #f0fdf4;
+      --green-500: #22c55e;
+      --green-600: #16a34a;
+      --red-50: #fef2f2;
+      --red-400: #f87171;
+      --red-600: #dc2626;
+      --yellow-50: #fefce8;
+      --yellow-500: #eab308;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.10);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      background: rgba(0,0,0,.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--white);
+    }
+
+    .nav-logo {
+      width: 32px;
+      height: 32px;
+      background: var(--white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--black);
+    }
+
+    .nav-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,.9);
+      letter-spacing: -.01em;
+    }
+
+    .nav-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,.5);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--radius-full);
+      padding: 2px 10px;
+      letter-spacing: .02em;
+    }
+
+    .nav-home-link {
+      color: rgba(255,255,255,.6);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .2s;
+    }
+    .nav-home-link:hover { color: var(--white); }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: var(--black);
+      padding: 72px 24px 64px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,255,255,.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,.7);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero-eyebrow svg { width: 14px; height: 14px; opacity: .8; }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      letter-spacing: -.03em;
+      margin-bottom: 16px;
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,.5);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    /* ─── SEARCH CARD ─── */
+    .search-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      max-width: 680px;
+      margin: -40px auto 0;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      z-index: 10;
+    }
+
+    .search-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 10px;
+      letter-spacing: .01em;
+    }
+
+    .search-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-input {
+      flex: 1;
+      height: 48px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 0 16px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--gray-900);
+      background: var(--gray-50);
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      outline: none;
+    }
+    .search-input::placeholder { color: var(--gray-400); }
+    .search-input:focus {
+      border-color: var(--gray-900);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+    }
+
+    .search-btn {
+      height: 48px;
+      padding: 0 22px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: var(--black);
+      color: var(--white);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .2s, transform .1s;
+      white-space: nowrap;
+    }
+    .search-btn:hover { background: var(--gray-800); }
+    .search-btn:active { transform: scale(.97); }
+    .search-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .search-hint {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 10px;
+    }
+
+    /* ─── MAIN CONTENT ─── */
+    main {
+      flex: 1;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ─── STATES ─── */
+    .state-box {
+      text-align: center;
+      padding: 64px 24px;
+    }
+
+    .state-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 28px;
+    }
+    .state-icon.gray { background: var(--gray-100); }
+    .state-icon.red { background: var(--red-50); }
+
+    .state-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .state-sub {
+      font-size: 14px;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+
+    /* ─── SPINNER ─── */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── RESULT SUMMARY ─── */
+    .result-summary {
+      background: rgba(17,24,39,.6);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      font-size: 14px;
+      color: rgba(255,255,255,.5);
+      margin-bottom: 16px;
+    }
+    .result-summary b { color: rgba(255,255,255,.9); }
+
+
+    /* ─── WARRANTY CARD (dark theme) ─── */
+    .warranty-card {
+      background: #111827;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      animation: fadeUp .35s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Card header ── */
+    .card-header {
+      padding: 20px 24px 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .card-product-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.01em;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+
+    .card-meta {
+      font-size: 13px;
+      color: rgba(255,255,255,.45);
+      line-height: 1.7;
+    }
+
+    /* ── Status badge ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    .badge-active   { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.18); }
+    .badge-active .badge-dot   { background: #4ade80; }
+    .badge-expired  { background: rgba(255,255,255,.07); color: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.1); }
+    .badge-expired .badge-dot  { background: rgba(255,255,255,.3); }
+    .badge-void     { background: rgba(255,60,60,.15); color: #fca5a5; border: 1px solid rgba(255,60,60,.2); }
+    .badge-void .badge-dot     { background: #f87171; }
+    .badge-replaced { background: rgba(234,179,8,.12); color: #fde68a; border: 1px solid rgba(234,179,8,.2); }
+    .badge-replaced .badge-dot { background: #fbbf24; }
+
+    /* ── Stat tiles grid ── */
+    .card-stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 16px;
+    }
+
+    .stat-tile {
+      background: #1f2937;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stat-tile-icon {
+      color: rgba(255,255,255,.45);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+    }
+    .stat-tile-icon svg { width: 18px; height: 18px; stroke-width: 1.5; }
+
+    .stat-tile-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: rgba(255,255,255,.35);
+    }
+
+    .stat-tile-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.4;
+    }
+    .stat-tile-value.highlight { color: #4ade80; }
+    .stat-tile-value.muted     { color: rgba(255,255,255,.45); }
+    .stat-tile-value.warning   { color: #fbbf24; }
+    .stat-tile-value.danger    { color: #f87171; }
+
+    /* Responsive: 2 cols on mobile */
+    @media (max-width: 680px) {
+      .card-stats { grid-template-columns: repeat(2, 1fr); }
+      .card-stats .stat-tile:last-child { grid-column: 1 / -1; }
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--black);
+      border-top: 1px solid rgba(255,255,255,.08);
+      text-align: center;
+      padding: 28px 24px;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: rgba(255,255,255,.35);
+    }
+
+    footer a {
+      color: rgba(255,255,255,.55);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    footer a:hover { color: var(--white); }
+
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .search-input-row { flex-direction: column; }
+      .search-btn { width: 100%; justify-content: center; }
+      .search-card { margin: -32px 16px 0; padding: 24px 20px; }
+      .hero { padding: 56px 20px 52px; }
+      .card-header { align-items: flex-start; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a href="#" class="nav-brand" data-main-site="home">
+      <div class="nav-logo">N</div>
+      <span class="nav-title">Ninh Kiều iStore</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="nav-badge">Warranty Service</span>
+      <a href="#" class="nav-home-link" data-main-site="home">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+        Trang chủ
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      Tra Cứu Bảo Hành
+    </div>
+    <h1>Kiểm tra bảo hành<br/>sản phẩm của bạn</h1>
+    <p class="hero-sub">Nhập số điện thoại hoặc IMEI / Serial để xem tình trạng bảo hành chính xác nhất.</p>
+  </section>
+
+  <!-- SEARCH CARD -->
+  <div class="search-card" style="max-width:680px;margin:-40px auto 0;">
+    <label class="search-label" for="query-input">Số điện thoại hoặc IMEI / Serial</label>
+    <div class="search-input-row">
+      <input
+        id="query-input"
+        type="text"
+        class="search-input"
+        placeholder="Ví dụ: 0901234567 hoặc 356789012345678"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      />
+      <button class="search-btn" id="search-btn" onclick="handleSearch()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Tra cứu
+      </button>
+    </div>
+    <p class="search-hint">💡 Nhập SĐT → tra cứu theo khách hàng &nbsp;|&nbsp; Nhập IMEI/Serial → tra cứu theo thiết bị</p>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main id="results-area">
+    <!-- Initial state -->
+    <div class="state-box" id="initial-state">
+      <div class="state-icon gray">🛡️</div>
+      <p class="state-title">Sẵn sàng tra cứu</p>
+      <p class="state-sub">Nhập thông tin vào ô tìm kiếm phía trên để kiểm tra bảo hành của bạn.</p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      © 2025 <a href="#" data-main-site="home">Ninh Kiều iStore</a> · Dịch vụ bảo hành &nbsp;·&nbsp;
+      <a href="#" data-main-site="home">Quay về trang chủ</a>
+    </p>
+  </footer>
+
+  <script>
+    const API_BASE = '/api/warranty';
+
+    const isPhoneLookup = (value) => {
+      const v = String(value || '').trim();
+      if (/[A-Za-z]/.test(v)) return false;
+      const digits = v.replace(/\D+/g, '');
+      if (digits.length === 15) return false;
+      return digits.length >= 9 && digits.length <= 11;
+    };
+
+    const formatDate = (value) => {
+      if (!value) return 'N/A';
+      return new Intl.DateTimeFormat('vi-VN', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+      }).format(new Date(value));
+    };
+
+    const formatRemaining = (days) => {
+      const d = Number(days) || 0;
+      if (d <= 0) return 'Đã hết hạn';
+      const months = Math.floor(d / 30);
+      const rem = d % 30;
+      if (months <= 0) return `${rem} ngày`;
+      if (rem === 0) return `${months} tháng`;
+      return `${months} tháng ${rem} ngày`;
+    };
+
+    const STATUS_MAP = {
+      ACTIVE: { label: 'Còn bảo hành', badge: 'badge-active', emoji: '✅' },
+      EXPIRED: { label: 'Hết bảo hành', badge: 'badge-expired', emoji: '⏰' },
+      VOID: { label: 'Bảo hành vô hiệu', badge: 'badge-void', emoji: '🚫' },
+      REPLACED: { label: 'Đã đổi máy', badge: 'badge-replaced', emoji: '🔄' },
+    };
+
+    const setLoading = (on) => {
+      const btn = document.getElementById('search-btn');
+      btn.disabled = on;
+      btn.innerHTML = on
+        ? `<div class="spinner"></div> Đang tra cứu...`
+        : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg> Tra cứu`;
+    };
+
+    // SVG icons cho stat tiles
+    const ICONS = {
+      calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,
+      shield:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+      clock:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+      check:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
+      doc:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12h6M9 15h4"/></svg>`,
+    };
+
+    const renderCard = (item, index) => {
+      const status = String(item.warrantyStatus || '').toUpperCase();
+      const meta = STATUS_MAP[status] || STATUS_MAP.EXPIRED;
+      const remaining = Number(item.remainingWarrantyDays) || 0;
+      const identifier = item.imei || item.serialNumber || item.identifier || '';
+
+      // Màu sắc value theo trạng thái
+      const valueClass = status === 'ACTIVE' ? 'highlight'
+                       : status === 'VOID'    ? 'danger'
+                       : status === 'REPLACED'? 'warning'
+                       : 'muted';
+
+      return `
+        <div class="warranty-card" style="animation-delay:${index * 80}ms">
+          <div class="card-header">
+            <div style="min-width:0;flex:1">
+              <div class="card-product-name">${escHtml(item.productName || 'Không rõ sản phẩm')}</div>
+              <div class="card-meta">
+                ${identifier ? `Thiết bị: ${escHtml(identifier)}<br>` : ''}
+                Số điện thoại: ${escHtml(item.customerPhone || '')}
+              </div>
+            </div>
+            <span class="badge ${meta.badge}">
+              <span class="badge-dot"></span>${meta.label}
+            </span>
+          </div>
+
+          <div class="card-stats">
+            <div class="stat-tile">
+              <div class="stat-tile-icon">${ICONS.calendar}</div>
+              <div class="stat-tile-label">Ngày mua</div>
+              <div class="stat-tile-value">${formatDate(item.purchaseDate)}</div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-icon">${ICONS.shield}</div>
+              <div class="stat-tile-label">Hạn bảo hành</div>
+              <div class="stat-tile-value">${formatDate(item.warrantyExpirationDate)}</div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-icon">${ICONS.clock}</div>
+              <div class="stat-tile-label">Thời gian còn lại</div>
+              <div class="stat-tile-value ${remaining <= 0 ? 'muted' : ''}">${formatRemaining(remaining)}</div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-icon">${ICONS.check}</div>
+              <div class="stat-tile-label">Trạng thái</div>
+              <div class="stat-tile-value ${valueClass}">${meta.label}</div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-tile-icon">${ICONS.doc}</div>
+              <div class="stat-tile-label">Chính sách</div>
+              <div class="stat-tile-value" style="font-size:12px;font-weight:500;color:rgba(255,255,255,.55);">${escHtml(item.warrantyPolicy || 'Theo chính sách bảo hành của cửa hàng')}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
+    const escHtml = (str) => String(str || '').replace(/[&<>"']/g,
+      c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    const showState = (type, extra = {}) => {
+      const area = document.getElementById('results-area');
+      if (type === 'initial') {
+        area.innerHTML = `
+          <div class="state-box">
+            <div class="state-icon gray">🛡️</div>
+            <p class="state-title">Sẵn sàng tra cứu</p>
+            <p class="state-sub">Nhập thông tin vào ô tìm kiếm phía trên để kiểm tra bảo hành của bạn.</p>
+          </div>`;
+      } else if (type === 'empty') {
+        area.innerHTML = `
+          <div class="state-box">
+            <div class="state-icon gray">🔍</div>
+            <p class="state-title">Không tìm thấy</p>
+            <p class="state-sub">Không có dữ liệu bảo hành cho "<strong>${escHtml(extra.query)}</strong>".<br/>Kiểm tra lại SĐT, IMEI hoặc Serial rồi thử lại.</p>
+          </div>`;
+      } else if (type === 'error') {
+        area.innerHTML = `
+          <div class="state-box">
+            <div class="state-icon red">⚠️</div>
+            <p class="state-title">Lỗi tra cứu</p>
+            <p class="state-sub">${escHtml(extra.message)}</p>
+          </div>`;
+      }
+    };
+
+    const handleSearch = async () => {
+      const input = document.getElementById('query-input');
+      const query = String(input.value || '').trim();
+
+      if (!query) {
+        input.focus();
+        input.style.borderColor = '#ef4444';
+        setTimeout(() => { input.style.borderColor = ''; }, 2000);
+        return;
+      }
+
+      setLoading(true);
+      const byPhone = isPhoneLookup(query);
+      const params = byPhone
+        ? `phone=${encodeURIComponent(query)}`
+        : `imeiOrSerial=${encodeURIComponent(query)}`;
+
+      try {
+        const res = await fetch(`${API_BASE}/search?${params}`);
+        const data = await res.json();
+
+        setLoading(false);
+
+        if (!res.ok || !data.success) {
+          const msg = data.message || 'Không tìm thấy thông tin bảo hành phù hợp.';
+          if (res.status === 404) {
+            showState('empty', { query });
+          } else {
+            showState('error', { message: msg });
+          }
+          return;
+        }
+
+        const warranties = data.data?.warranties || data.warranties || [];
+        if (!warranties.length) {
+          showState('empty', { query });
+          return;
+        }
+
+        const area = document.getElementById('results-area');
+        const total = data.data?.total || warranties.length;
+        const summary = `
+          <div class="result-summary">
+            Tìm thấy <b>${total}</b> bảo hành cho "${escHtml(query)}"
+          </div>`;
+        const cards = warranties.map((w, i) => renderCard(w, i)).join('');
+        area.innerHTML = summary + cards;
+
+      } catch (err) {
+        setLoading(false);
+        showState('error', { message: 'Không thể kết nối đến máy chủ. Vui lòng thử lại.' });
+      }
+    };
+
+    // Press Enter to search + load main site URL dynamically
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('query-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleSearch();
+      });
+
+      // Load main site URL from server config (works both localhost and production)
+      try {
+        const cfg = await fetch('/api/config').then(r => r.json());
+        const mainSiteUrl = cfg.mainSiteUrl || '/';
+        document.querySelectorAll('[data-main-site="home"]').forEach(el => {
+          el.href = mainSiteUrl;
+        });
+      } catch (_) {
+        // fallback: keep href="#"
+      }
+    });
+  </script>
+</body>
+</html>
