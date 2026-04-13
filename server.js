@@ -25,6 +25,13 @@ app.use(express.json());
 app.get("/api/config", (req, res) => {
   res.json({
     mainSiteUrl: process.env.MAIN_SITE_URL || "http://localhost:5173",
+    // Debug info — sẽ xóa sau khi fix
+    _debug: {
+      dbState: mongoose.connection.readyState,
+      dbName: mongoose.connection.name,
+      MAIN_API_URL: process.env.MAIN_API_URL,
+      MONGODB_URI_prefix: (process.env.MONGODB_URI || "").substring(0, 60) + "...",
+    },
   });
 });
 
