@@ -6,7 +6,6 @@ import { fileURLToPath } from "url";
 import connectDB from "./src/config/database.js";
 import warrantyRoutes from "./src/routes/warrantyRoutes.js";
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -61,12 +60,17 @@ app.use((err, req, res, next) => {
 // ================================
 connectDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`🛡️  Warranty Microservice running on http://localhost:${PORT}`);
+    console.log(
+      `🛡️  Warranty Microservice running on http://localhost:${PORT}`,
+    );
     console.log(`🔗  Main API URL: ${process.env.MAIN_API_URL}`);
-    console.log(`🌐  Main Site URL: ${process.env.MAIN_SITE_URL || "http://localhost:5173"}`);
-    console.log(`🗄️  MongoDB URI: ${process.env.MONGODB_URI?.replace(/\/\/.*@/, "//***@") || "local"}`);
+    console.log(
+      `🌐  Main Site URL: ${process.env.MAIN_SITE_URL || "http://localhost:5173"}`,
+    );
+    console.log(
+      `🗄️  MongoDB URI: ${process.env.MONGODB_URI?.replace(/\/\/.*@/, "//***@") || "local"}`,
+    );
   });
 });
-
 
 export default app;

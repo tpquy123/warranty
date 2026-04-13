@@ -41,7 +41,7 @@ const resolveWarrantyStatus = (record, now = new Date()) => {
 };
 
 /**
- * Format một record thành object trả về cho frontend
+ * Format một record từ warranty_db local thành object trả về cho frontend
  */
 const buildPublicItem = (record, now = new Date()) => {
   const expiresAt = record.expiresAt instanceof Date ? record.expiresAt : new Date(record.expiresAt);
@@ -77,7 +77,6 @@ const buildPublicItem = (record, now = new Date()) => {
  * Nếu main app offline thì bỏ qua — dùng productName đã lưu sẵn.
  */
 const enrichWithProduct = async (items) => {
-  // Nhóm theo mainAppProductId để batch fetch
   const ids = [...new Set(items.map((i) => i.mainAppProductId).filter(Boolean))];
   if (!ids.length) return items;
 
@@ -98,16 +97,59 @@ const enrichWithProduct = async (items) => {
     if (!product) return item;
     return {
       ...item,
-      // Cập nhật tên sản phẩm mới nhất từ main app (nếu có)
       productName: product.name || item.productName,
     };
   });
 };
 
+// ─── Fallback: Gọi API bảo hành từ web chính ──────────────────────────────
+
+/**
+ * Gọi GET /api/warranty/search từ web chính (Store).
+ * Fallback khi warranty_db local không có dữ liệu — điều này thường xảy ra
+ * trên production lần đầu trước khi sync data.
+ */
+const fetchWarrantyFromMainApp = async ({ phone = "", imeiOrSerial = "" } = {}) => {
+  const MAIN_API_URL = process.env.MAIN_API_URL || "http://localhost:5000/api";
+  const params = new URLSearchParams();
+  if (phone) params.set("phone", phone);
+  if (imeiOrSerial) params.set("imeiOrSerial", imeiOrSerial);
+
+  const url = `${MAIN_API_URL}/warranty/search?${params.toString()}`;
+  console.log(`🔗 Fallback to main app: ${url}`);
+
+  const response = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(8000),
+  });
+
+  // 404 = không có data bên main app cũng → trả về null bình thường
+  if (response.status === 404) return null;
+
+  if (!response.ok) {
+    throw new Error(`Main app API responded with status ${response.status}`);
+  }
+
+  const json = await response.json();
+  // Main app trả về: { success, data: { warranties, total, searchBy, query } }
+  const warranties = json?.data?.warranties || json?.warranties || [];
+  if (!warranties.length) return null;
+
+  return {
+    searchBy: json?.data?.searchBy || (phone ? "PHONE" : "IDENTIFIER"),
+    query: json?.data?.query || phone || imeiOrSerial,
+    total: warranties.length,
+    warranties,
+  };
+};
+
 // ─── Tra cứu bảo hành (luồng chính) ───────────────────────────────────────
 
 /**
- * Tìm kiếm bảo hành trong database LOCAL của web bảo hành.
+ * Tìm kiếm bảo hành:
+ *   1. Ưu tiên tìm trong warranty_db local
+ *   2. Nếu local không có → fallback gọi API web chính (Store)
+ *
  * @param {{ phone?: string, imeiOrSerial?: string }} params
  */
 export const searchLocalWarranty = async ({ phone = "", imeiOrSerial = "" } = {}) => {
@@ -122,6 +164,7 @@ export const searchLocalWarranty = async ({ phone = "", imeiOrSerial = "" } = {}
     throw err;
   }
 
+  // ─── Bước 1: Tìm trong warranty_db local ──────────────────────────────────
   let query;
   let searchBy;
 
@@ -137,28 +180,46 @@ export const searchLocalWarranty = async ({ phone = "", imeiOrSerial = "" } = {}
     .sort({ startDate: -1, createdAt: -1 })
     .lean();
 
-  if (!records.length) {
-    const err = new Error("Không tìm thấy thông tin bảo hành");
-    err.status = 404;
-    throw err;
+  if (records.length) {
+    // Có dữ liệu local → trả về ngay
+    const now = new Date();
+    let items = records.map((r) => buildPublicItem(r, now));
+
+    try {
+      items = await enrichWithProduct(items);
+    } catch (_) {
+      // enrich không bắt buộc — bỏ qua nếu lỗi
+    }
+
+    return {
+      searchBy,
+      query: lookupKey || normalizedPhone,
+      total: items.length,
+      warranties: items,
+    };
   }
 
-  const now = new Date();
-  let items = records.map((r) => buildPublicItem(r, now));
-
-  // Enrich thông tin sản phẩm từ main app (không bắt buộc)
+  // ─── Bước 2: Local DB trống → fallback sang web chính ─────────────────────
+  console.log("📡 No local records — falling back to main app API...");
   try {
-    items = await enrichWithProduct(items);
-  } catch (_) {
-    // Nếu lỗi enrich thì vẫn trả về dữ liệu local
+    const mainResult = await fetchWarrantyFromMainApp({
+      phone: normalizedPhone,
+      imeiOrSerial: lookupKey || imeiOrSerial,
+    });
+
+    if (mainResult && mainResult.warranties.length > 0) {
+      console.log(`✅ Found ${mainResult.warranties.length} warranties from main app`);
+      return mainResult;
+    }
+  } catch (fallbackErr) {
+    console.error("⚠️ Fallback to main app failed:", fallbackErr.message);
+    // Nếu main app lỗi → vẫn báo 404 bên dưới
   }
 
-  return {
-    searchBy,
-    query: lookupKey || normalizedPhone,
-    total: items.length,
-    warranties: items,
-  };
+  // ─── Không tìm thấy ở cả hai nguồn ──────────────────────────────────────
+  const err = new Error("Không tìm thấy thông tin bảo hành");
+  err.status = 404;
+  throw err;
 };
 
 // ─── Tạo bản ghi bảo hành mới ─────────────────────────────────────────────
